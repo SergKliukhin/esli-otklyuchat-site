@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Интерактивный чек-лист проекта «ЕСЛИ ОТКЛЮЧАТ». Отмечайте готовность — прогресс сохраняется локально в браузере.">
+  <title>Чек-лист — ЕСЛИ ОТКЛЮЧАТ</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#123c4a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">ЕСЛИ&nbsp;ОТКЛЮЧАТ</a>
+      <nav class="main-nav">
+        <a href="index.html#what">Что отключится</a>
+        <a href="index.html#prepare">Что подготовить</a>
+        <a href="index.html#family">Семье</a>
+        <a href="index.html#business">Бизнесу</a>
+        <a href="index.html#today">Сегодня</a>
+        <a href="about.html">О проекте</a>
+        <a href="checklist.html" class="active">Чек-лист</a>
+        <a href="resources.html">Ресурсы</a>
+        <a href="audit.html">Аудит</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Заголовок страницы -->
+    <section class="hero hero-sub">
+      <div class="container hero-inner">
+        <p class="hero-eyebrow">Чек-лист</p>
+        <h1 class="hero-title">Чек-лист готовности</h1>
+        <p class="hero-subtitle">Отмечайте выполненные пункты — прогресс сохранится в браузере</p>
+        <p class="hero-lead">
+          Пошаговый список действий из проекта «ЕСЛИ ОТКЛЮЧАТ».
+          Отмечайте пункты по мере выполнения: общий прогресс и прогресс по
+          разделам считаются автоматически, а состояние хранится локально —
+          даже после закрытия вкладки.
+        </p>
+      </div>
+    </section>
+
+    <!-- Прогресс -->
+    <section class="section" style="padding-bottom: 0;">
+      <div class="container">
+        <p class="note">
+          Данные хранятся только в вашем браузере (localStorage). Ничего не
+          отправляется на сервер. Очистка истории браузера сбросит отметки.
+        </p>
+        <div class="progress-card">
+          <div class="progress-info">
+            <h3>Общий прогресс</h3>
+            <div class="progress-track">
+              <div class="progress-fill" id="globalFill"></div>
+            </div>
+            <p class="progress-stats" id="globalStats">0 из 0 (0%)</p>
+          </div>
+          <div class="progress-actions">
+            <button type="button" class="btn-reset" id="resetBtn">Сбросить всё</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 01. Базовый запас -->
+    <section class="section" id="sec-base">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">01</span>
+          <h2>Базовый запас <span class="count" data-count="base">0/0</span></h2>
+          <p class="section-intro">Минимум, которого хватит на несколько суток автономности.</p>
+        </header>
+        <div class="check-grid" data-group="base">
+          <label class="check-item"><input type="checkbox" id="base-water"><span class="check-label">Запас питьевой воды (~3 л на человека в сутки на 3–7 дней)</span></label>
+          <label class="check-item"><input type="checkbox" id="base-food"><span class="check-label">Нескоропортящиеся продукты: консервы, крупы, сухое молоко, чай</span></label>
+          <label class="check-item"><input type="checkbox" id="base-powerbank"><span class="check-label">Повербанки, заряженные до 100%</span></label>
+          <label class="check-item"><input type="checkbox" id="base-batteries"><span class="check-label">Запас батареек нужных типов</span></label>
+          <label class="check-item"><input type="checkbox" id="base-flashlight"><span class="check-label">Фонарики на каждый этаж / комнату</span></label>
+          <label class="check-item"><input type="checkbox" id="base-candles"><span class="check-label">Свечи и спички в непромокаемой упаковке</span></label>
+          <label class="check-item"><input type="checkbox" id="base-stove"><span class="check-label">Портативная газовая горелка + баллоны</span></label>
+          <label class="check-item"><input type="checkbox" id="base-cash"><span class="check-label">Наличные мелкими и средними купюрами</span></label>
+          <label class="check-item"><input type="checkbox" id="base-firstaid"><span class="check-label">Аптечка: антисептики, бинты, жаропонижающие</span></label>
+          <label class="check-item"><input type="checkbox" id="base-meds"><span class="check-label">Запас рецептурных лекарств (на 2+ недели)</span></label>
+          <label class="check-item"><input type="checkbox" id="base-docs"><span class="check-label">Бумажные копии паспортов, полисов, свидетельств</span></label>
+          <label class="check-item"><input type="checkbox" id="base-contacts"><span class="check-label">Распечатанный список контактов близких и экстренных служб</span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 02. План Б для семьи -->
+    <section class="section section-alt" id="sec-family">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">02</span>
+          <h2>План Б для семьи <span class="count" data-count="family">0/0</span></h2>
+          <p class="section-intro">Чтобы каждый знал, что делать и где искать остальных.</p>
+        </header>
+        <div class="check-grid" data-group="family">
+          <label class="check-item"><input type="checkbox" id="family-home-point"><span class="check-label">Назначена точка сбора дома</span></label>
+          <label class="check-item"><input type="checkbox" id="family-out-point"><span class="check-label">Назначена точка сбора вне дома</span></label>
+          <label class="check-item"><input type="checkbox" id="family-relay"><span class="check-label">Выбран контакт «вне зоны» (родственник в другом регионе)</span></label>
+          <label class="check-item"><input type="checkbox" id="family-who-calls"><span class="check-label">Договорились, кто кому звонит</span></label>
+          <label class="check-item"><input type="checkbox" id="family-special"><span class="check-label">Учтены особые потребности: дети, пожилые, животные</span></label>
+          <label class="check-item"><input type="checkbox" id="family-hospital"><span class="check-label">Известны адреса ближайших больниц и аптек</span></label>
+          <label class="check-item"><input type="checkbox" id="family-warm"><span class="check-label">Известен ближайший пункт обогрева</span></label>
+          <label class="check-item"><input type="checkbox" id="family-maps"><span class="check-label">Скачаны офлайн-карты региона</span></label>
+          <label class="check-item"><input type="checkbox" id="family-discuss"><span class="check-label">План обсуждён и согласован со всеми членами семьи</span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03. План Б для бизнеса -->
+    <section class="section" id="sec-business">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">03</span>
+          <h2>План Б для бизнеса <span class="count" data-count="business">0/0</span></h2>
+          <p class="section-intro">Готовность измеряется в часах автономной работы.</p>
+        </header>
+        <div class="check-grid" data-group="business">
+          <label class="check-item"><input type="checkbox" id="business-ups"><span class="check-label">ИБП для критичных систем</span></label>
+          <label class="check-item"><input type="checkbox" id="business-gen"><span class="check-label">Генератор для длительных отключений (при необходимости)</span></label>
+          <label class="check-item"><input type="checkbox" id="business-critical"><span class="check-label">Определено, что можно выключить, а что обязательно</span></label>
+          <label class="check-item"><input type="checkbox" id="business-backup"><span class="check-label">Локальные резервные копии баз и документов</span></label>
+          <label class="check-item"><input type="checkbox" id="business-keys"><span class="check-label">Копии ключей доступа хранятся офлайн</span></label>
+          <label class="check-item"><input type="checkbox" id="business-team-comms"><span class="check-label">Дублирующие каналы связи с командой</span></label>
+          <label class="check-item"><input type="checkbox" id="business-client-comms"><span class="check-label">Дублирующие каналы связи с клиентами</span></label>
+          <label class="check-item"><input type="checkbox" id="business-roles"><span class="check-label">Распределены роли: связь, техника, клиенты, деньги</span></label>
+          <label class="check-item"><input type="checkbox" id="business-cash"><span class="check-label">Продуман приём наличных и учёт продаж</span></label>
+          <label class="check-item"><input type="checkbox" id="business-cushion"><span class="check-label">Есть финансовая подушка на простой</span></label>
+          <label class="check-item"><input type="checkbox" id="business-independent"><span class="check-label">План работает без одного из руководителей</span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04. Что сделать сегодня -->
+    <section class="section section-alt" id="sec-today">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">04</span>
+          <h2>Что сделать сегодня <span class="count" data-count="today">0/0</span></h2>
+          <p class="section-intro">Действия на ближайшие часы. Начните с любого.</p>
+        </header>
+        <div class="check-grid" data-group="today">
+          <label class="check-item"><input type="checkbox" id="today-bag"><span class="check-label">Собрать «тревожный чемоданчик»</span></label>
+          <label class="check-item"><input type="checkbox" id="today-maps"><span class="check-label">Скачать офлайн-карты и справочники</span></label>
+          <label class="check-item"><input type="checkbox" id="today-contacts"><span class="check-label">Распечатать контакты близких и экстренных служб</span></label>
+          <label class="check-item"><input type="checkbox" id="today-firstaid"><span class="check-label">Проверить аптечку и сроки годности</span></label>
+          <label class="check-item"><input type="checkbox" id="today-charge"><span class="check-label">Зарядить повербанки</span></label>
+          <label class="check-item"><input type="checkbox" id="today-talk"><span class="check-label">Обсудить с семьёй план и точку сбора</span></label>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>ЕСЛИ ОТКЛЮЧАТ — План Б для людей и бизнеса. Чек-лист работает локально
+        в вашем браузере. Все материалы носят информационный характер.</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var STORAGE_KEY = "esli_otkluchat_checklist_v1";
+
+    var checkboxes   = Array.prototype.slice.call(document.querySelectorAll('.check-item input[type="checkbox"]'));
+    var globalFill   = document.getElementById('globalFill');
+    var globalStats  = document.getElementById('globalStats');
+    var resetBtn     = document.getElementById('resetBtn');
+    var countBadges  = Array.prototype.slice.call(document.querySelectorAll('[data-count]'));
+    var groups       = Array.prototype.slice.call(document.querySelectorAll('[data-group]'));
+
+    // Поддержка localStorage (на случай file:// с ограничениями)
+    function storeAvailable() {
+      try { var t = "__eo_test__"; localStorage.setItem(t, "1"); localStorage.removeItem(t); return true; }
+      catch (e) { return false; }
+    }
+    var HAS_STORE = storeAvailable();
+
+    function load() {
+      if (!HAS_STORE) return;
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch (e) { saved = {}; }
+      checkboxes.forEach(function (cb) {
+        if (saved[cb.id]) {
+          cb.checked = true;
+          cb.closest('.check-item').classList.add('done');
+        }
+      });
+    }
+
+    function save() {
+      if (!HAS_STORE) return;
+      var state = {};
+      checkboxes.forEach(function (cb) { state[cb.id] = cb.checked; });
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+      catch (e) { /* квота переполнена — игнорируем */ }
+    }
+
+    function update() {
+      // Общий прогресс
+      var total = checkboxes.length;
+      var done = 0;
+      checkboxes.forEach(function (cb) { if (cb.checked) done++; });
+      var pct = total ? Math.round(done / total * 100) : 0;
+      if (globalFill) globalFill.style.width = pct + '%';
+      if (globalStats) globalStats.textContent = done + ' из ' + total + ' (' + pct + '%)';
+
+      // Прогресс по разделам
+      groups.forEach(function (grid) {
+        var groupName = grid.getAttribute('data-group');
+        var items = Array.prototype.slice.call(grid.querySelectorAll('input[type="checkbox"]'));
+        var d = 0;
+        items.forEach(function (cb) { if (cb.checked) d++; });
+        var badge = document.querySelector('[data-count="' + groupName + '"]');
+        if (badge) badge.textContent = d + '/' + items.length;
+      });
+    }
+
+    // Обработка кликов
+    checkboxes.forEach(function (cb) {
+      cb.addEventListener('change', function () {
+        cb.closest('.check-item').classList.toggle('done', cb.checked);
+        save();
+        update();
+      });
+    });
+
+    // Сброс
+    if (resetBtn) {
+      resetBtn.addEventListener('click', function () {
+        if (!confirm('Сбросить все отметки чек-листа? Это действие нельзя отменить.')) return;
+        checkboxes.forEach(function (cb) {
+          cb.checked = false;
+          cb.closest('.check-item').classList.remove('done');
+        });
+        save();
+        update();
+      });
+    }
+
+    load();
+    update();
+  })();
+  </script>
+
+  <script src="app.js" defer></script>
+  <script src="plan-tools.js" defer></script>
+
+</body>
+</html>

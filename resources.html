@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Полезные материалы и ресурсы проекта «ЕСЛИ ОТКЛЮЧАТ»: связь, питание, вода, документы, безопасность. Поиск и фильтрация по карточкам.">
+  <title>Ресурсы — ЕСЛИ ОТКЛЮЧАТ</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#123c4a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="app.css">
+  <style>
+    /* Стили, специфичные для страницы «Ресурсы». Локальные, без внешних ресурсов. */
+    .search-wrap {
+      max-width: 640px;
+      margin: 0 auto 8px;
+    }
+    .search-field {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .search-field::before {
+      content: "";
+      position: absolute;
+      left: 18px;
+      width: 16px;
+      height: 16px;
+      border: 2px solid var(--text-mute);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+    .search-field::after {
+      content: "";
+      position: absolute;
+      left: 30px;
+      top: 50%;
+      width: 8px;
+      height: 2px;
+      background: var(--text-mute);
+      transform: rotate(45deg);
+      transform-origin: left center;
+      pointer-events: none;
+    }
+    .search-input {
+      width: 100%;
+      padding: 14px 18px 14px 50px;
+      font-size: 16px;
+      font-family: inherit;
+      color: var(--text);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    .search-input::placeholder { color: var(--text-mute); }
+    .search-input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(31, 111, 139, .12);
+    }
+    .search-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 14px auto 0;
+      max-width: 640px;
+      font-size: 14px;
+      color: var(--text-mute);
+    }
+    .search-meta button {
+      background: transparent;
+      border: none;
+      color: var(--primary);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .15s ease;
+    }
+    .search-meta button:hover { background: rgba(31, 111, 139, .08); }
+
+    /* Карточка ресурса */
+    .card.resource { display: flex; flex-direction: column; }
+    .resource-tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(47, 158, 143, .1);
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 14px;
+      align-self: flex-start;
+    }
+    .card.resource h3 { margin-bottom: 8px; }
+    .card.resource h3 a { color: inherit; }
+    .card.resource h3 a:hover { color: var(--primary); }
+    .card.resource .card-desc {
+      flex: 1;
+      color: var(--text-soft);
+      font-size: 15.5px;
+      margin: 0 0 18px;
+    }
+    .card.resource .card-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--primary);
+    }
+    .card.resource .card-link:hover { color: var(--primary-dark); }
+
+    /* Пустое состояние */
+    .empty-state {
+      display: none;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-mute);
+    }
+    .empty-state.is-visible { display: block; }
+    .empty-state p { margin: 0; font-size: 16px; }
+
+    /* Скрытие карточек при фильтрации */
+    .card.resource.is-hidden { display: none; }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">ЕСЛИ&nbsp;ОТКЛЮЧАТ</a>
+      <nav class="main-nav">
+        <a href="index.html#what">Что отключится</a>
+        <a href="index.html#prepare">Что подготовить</a>
+        <a href="index.html#family">Семье</a>
+        <a href="index.html#business">Бизнесу</a>
+        <a href="index.html#today">Сегодня</a>
+        <a href="about.html">О проекте</a>
+        <a href="checklist.html">Чек-лист</a>
+        <a href="resources.html" class="active">Ресурсы</a>
+        <a href="audit.html">Аудит</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Заголовок страницы -->
+    <section class="hero hero-sub">
+      <div class="container hero-inner">
+        <p class="hero-eyebrow">Ресурсы</p>
+        <h1 class="hero-title">Ресурсы</h1>
+        <p class="hero-subtitle">Подборка материалов для подготовки к перебоям</p>
+        <p class="hero-lead">
+          Краткие карточки по ключевым темам: связь, питание, вода, документы,
+          безопасность и обучение. Введите слово в поле поиска, чтобы отфильтровать
+          нужные материалы.
+        </p>
+      </div>
+    </section>
+
+    <!-- Поиск -->
+    <section class="section" style="padding-bottom: 0;">
+      <div class="container">
+        <div class="search-wrap">
+          <div class="search-field">
+            <input type="search" id="searchInput" class="search-input"
+                   placeholder="Поиск: связь, вода, питание, документы…"
+                   autocomplete="off" aria-label="Поиск материалов">
+          </div>
+          <div class="search-meta">
+            <span id="resultCount">Все материалы</span>
+            <button type="button" id="clearBtn" hidden>Очистить</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Карточки материалов -->
+    <section class="section">
+      <div class="container">
+        <div class="grid cards" id="resourcesGrid">
+
+          <article class="card resource" data-keywords="связь мессенджер рация смс оператор дублирование канал">
+            <span class="resource-tag">Связь</span>
+            <h3><a href="#">Запасные каналы связи</a></h3>
+            <p class="card-desc">Дублирующие способы связи с близкими: второй мобильный оператор,
+              SMS-сообщения, рации и голосовые мессенджеры.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="питание зарядка повербанк батарея солнечная панель">
+            <span class="resource-tag">Питание</span>
+            <h3><a href="#">Повербанки и зарядка</a></h3>
+            <p class="card-desc">Ёмкие повербанки, портативные солнечные панели и адаптеры
+              для поддержания устройств в рабочем состоянии.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="вода еда питьё запас хранение">
+            <span class="resource-tag">Вода и еда</span>
+            <h3><a href="#">Запас питьевой воды</a></h3>
+            <p class="card-desc">Расчёт суточной нормы, правила хранения и регулярного
+              обновления запаса воды для всей семьи.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="здоровье аптечка лекарства медикаменты первая помощь">
+            <span class="resource-tag">Здоровье</span>
+            <h3><a href="#">Аптечка первой помощи</a></h3>
+            <p class="card-desc">Базовый набор препаратов и расходников для автономной аптечки:
+              антисептики, бинты, жаропонижающие, рецептурные лекарства.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="навигация карты офлайн справочник gps">
+            <span class="resource-tag">Навигация</span>
+            <h3><a href="#">Офлайн-карты</a></h3>
+            <p class="card-desc">Скачивание офлайн-карт региона, справочников и маршрутов
+              заранее — чтобы навигация работала без интернета.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="документы паспорт полис копии бумага">
+            <span class="resource-tag">Документы</span>
+            <h3><a href="#">Бумажные копии документов</a></h3>
+            <p class="card-desc">Какие документы продублировать на бумаге — паспорта, полисы,
+              свидетельства — и как хранить их в непромокаемой упаковке.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="деньги наличные финансы подушка купюры">
+            <span class="resource-tag">Безопасность</span>
+            <h3><a href="#">Финансовая подушка</a></h3>
+            <p class="card-desc">Наличные мелкими и средними купюрами и резерв на непредвиденный
+              период, когда терминалы и банкоматы не работают.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="питание еда горелка газ плита кипячение">
+            <span class="resource-tag">Питание</span>
+            <h3><a href="#">Газовая горелка и баллоны</a></h3>
+            <p class="card-desc">Приготовление еды и кипячение воды без электричества:
+              выбор горелки, запас баллонов и техника безопасности.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="связь семья встреча точка сбор план">
+            <span class="resource-tag">Связь</span>
+            <h3><a href="#">Точка сбора семьи</a></h3>
+            <p class="card-desc">Договорённости о местах встречи дома и вне дома на случай,
+              если родные разойдутся без связи.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="связь контакты телефоны печать экстренные службы врачи">
+            <span class="resource-tag">Связь</span>
+            <h3><a href="#">Печать контактов</a></h3>
+            <p class="card-desc">Распечатанный список телефонов близких, врачей, соседей
+              и экстренных служб — офлайн-запасная записная книжка.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="питание ибп бесперебойник генератор электричество офис дом">
+            <span class="resource-tag">Питание</span>
+            <h3><a href="#">ИБП для дома и офиса</a></h3>
+            <p class="card-desc">Выбор источника бесперебойного питания под критичные
+              устройства: роутер, холодильник, сервер, освещение.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+          <article class="card resource" data-keywords="обучение чек-лист план подготовка шаги">
+            <span class="resource-tag">Обучение</span>
+            <h3><a href="#">Чек-лист готовности</a></h3>
+            <p class="card-desc">Пошаговый список действий, которые можно отметить
+              и отследить — прогресс сохраняется в браузере.</p>
+            <a href="#" class="card-link">Подробнее →</a>
+          </article>
+
+        </div>
+
+        <!-- Пустое состояние -->
+        <div class="empty-state" id="emptyState" role="status" aria-live="polite">
+          <p>По запросу ничего не найдено. Попробуйте другое слово.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>ЕСЛИ ОТКЛЮЧАТ — План Б для людей и бизнеса. Поиск материалов работает
+        локально в вашем браузере. Все ссылки носят информационный характер.</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var input       = document.getElementById('searchInput');
+    var clearBtn    = document.getElementById('clearBtn');
+    var resultCount = document.getElementById('resultCount');
+    var emptyState  = document.getElementById('emptyState');
+    var cards       = Array.prototype.slice.call(document.querySelectorAll('.card.resource'));
+
+    var total = cards.length;
+
+    function normalize(str) {
+      return (str || '')
+        .toLowerCase()
+        .replace(/ё/g, 'е')
+        .trim();
+    }
+
+    // Текст для поиска по каждой карточке: заголовок + описание + категория + ключевые слова
+    cards.forEach(function (card) {
+      var title = card.querySelector('h3') ? card.querySelector('h3').textContent : '';
+      var desc  = card.querySelector('.card-desc') ? card.querySelector('.card-desc').textContent : '';
+      var tag   = card.querySelector('.resource-tag') ? card.querySelector('.resource-tag').textContent : '';
+      var kw    = card.getAttribute('data-keywords') || '';
+      card.setAttribute('data-searchtext', normalize(title + ' ' + desc + ' ' + tag + ' ' + kw));
+    });
+
+    function filter() {
+      var raw = input.value;
+      var query = normalize(raw);
+      var visible = 0;
+
+      cards.forEach(function (card) {
+        var haystack = card.getAttribute('data-searchtext');
+        var match = !query || haystack.indexOf(query) !== -1;
+        if (match) {
+          card.classList.remove('is-hidden');
+          visible++;
+        } else {
+          card.classList.add('is-hidden');
+        }
+      });
+
+      // Состояние счётчика
+      if (!query) {
+        resultCount.textContent = 'Все материалы (' + total + ')';
+      } else {
+        resultCount.textContent = visible === 0
+          ? 'Ничего не найдено'
+          : 'Найдено: ' + visible + ' из ' + total;
+      }
+
+      // Кнопка очистки
+      clearBtn.hidden = !raw;
+
+      // Пустое состояние
+      if (visible === 0) {
+        emptyState.classList.add('is-visible');
+      } else {
+        emptyState.classList.remove('is-visible');
+      }
+    }
+
+    input.addEventListener('input', filter);
+
+    clearBtn.addEventListener('click', function () {
+      input.value = '';
+      filter();
+      input.focus();
+    });
+
+    // Очистка поиска по Esc
+    input.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && input.value) {
+        input.value = '';
+        filter();
+      }
+    });
+
+    filter();
+  })();
+  </script>
+
+  <script src="app.js" defer></script>
+  <script src="plan-tools.js" defer></script>
+
+</body>
+</html>

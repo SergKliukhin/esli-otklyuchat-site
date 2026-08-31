@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Интерактивный аудит цифровой устойчивости проекта «ЕСЛИ ОТКЛЮЧАТ». 20 вопросов, оценка от 0 до 100 и персональные рекомендации. Результат сохраняется в браузере.">
+  <title>Аудит устойчивости — ЕСЛИ ОТКЛЮЧАТ</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#123c4a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="app.css">
+  <style>
+    /* Стили, специфичные для страницы «Аудит». Локальные, без внешних ресурсов. */
+    .audit-score-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px 32px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      flex-wrap: wrap;
+    }
+    .score-block { flex: 0 0 auto; text-align: center; min-width: 150px; }
+    .score-big {
+      font-size: 56px;
+      font-weight: 800;
+      line-height: 1;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin: 0;
+    }
+    .score-big .score-max {
+      font-size: 22px;
+      color: var(--text-mute);
+      font-weight: 600;
+    }
+    .score-badge {
+      display: inline-block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-top: 12px;
+      letter-spacing: .02em;
+    }
+    .score-badge.risk { background: #d64545; }
+    .score-badge.low  { background: #e08a3c; }
+    .score-badge.mid  { background: #c98a00; }
+    .score-badge.good { background: var(--accent); }
+    .score-info { flex: 1 1 280px; min-width: 220px; }
+    .score-info h3 { margin-bottom: 12px; font-size: 18px; }
+    .score-summary { color: var(--text-soft); font-size: 15px; margin: 12px 0 0; }
+    .score-actions { display: flex; gap: 12px; flex-wrap: wrap; align-self: flex-start; }
+
+    /* Карточка вопроса */
+    .audit-q { padding: 22px 24px; }
+    .q-head {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+    .q-num {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      color: var(--accent);
+    }
+    .q-cat {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mute);
+      background: rgba(107, 114, 128, .1);
+      padding: 2px 9px;
+      border-radius: 999px;
+    }
+    .q-title { font-size: 17px; margin: 4px 0 16px; line-height: 1.35; }
+    .q-options { display: flex; gap: 10px; flex-wrap: wrap; }
+    .q-opt {
+      background: #fff;
+      border: 1px solid var(--border);
+      color: var(--text-soft);
+      padding: 9px 20px;
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .15s ease, border-color .15s ease, color .15s ease, transform .1s ease;
+    }
+    .q-opt:hover { border-color: var(--primary); color: var(--primary); }
+    .q-opt:active { transform: scale(.97); }
+    .q-opt[data-value="да"][aria-pressed="true"] {
+      background: var(--accent); border-color: var(--accent); color: #fff;
+    }
+    .q-opt[data-value="частично"][aria-pressed="true"] {
+      background: #e08a3c; border-color: #e08a3c; color: #fff;
+    }
+    .q-opt[data-value="нет"][aria-pressed="true"] {
+      background: #d64545; border-color: #d64545; color: #fff;
+    }
+
+    /* Рекомендации */
+    .rec-intro { color: var(--text-soft); font-size: 16px; margin-bottom: 24px; }
+    .rec-group { margin-bottom: 28px; }
+    .rec-group:last-child { margin-bottom: 0; }
+    .rec-group h3 {
+      font-size: 16px;
+      color: var(--primary-dark);
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border);
+    }
+    .rec-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      padding: 8px 0;
+      font-size: 15px;
+      color: var(--text-soft);
+      line-height: 1.5;
+    }
+    .rec-item::before {
+      content: "";
+      flex: 0 0 8px;
+      width: 8px;
+      height: 8px;
+      margin-top: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+    }
+    .rec-ok {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      padding: 16px 0;
+    }
+    .rec-hint {
+      text-align: center;
+      color: var(--text-mute);
+      font-size: 15px;
+      padding: 12px 0;
+    }
+
+    @media (max-width: 560px) {
+      .audit-score-card { padding: 22px; gap: 20px; }
+      .score-big { font-size: 46px; }
+    }
+
+    /* ===== Мой план Б ===== */
+    /* Раздел скрыт, пока не отвечены все вопросы */
+    .plan-section { display: none; }
+    .plan-section.is-ready { display: block; }
+
+    .plan-stats {
+      display: flex;
+      gap: 32px;
+      flex-wrap: wrap;
+      margin-bottom: 22px;
+      padding-bottom: 22px;
+      border-bottom: 1px solid var(--border);
+    }
+    .plan-stat { font-size: 14px; color: var(--text-mute); }
+    .plan-stat strong {
+      display: block;
+      font-size: 30px;
+      font-weight: 800;
+      line-height: 1.1;
+      margin-bottom: 2px;
+      color: var(--text);
+    }
+    .plan-stat.high strong { color: #d64545; }
+    .plan-stat.mid strong  { color: #c98a00; }
+
+    .plan-actions { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 26px; }
+    .plan-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 20px;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-soft);
+      transition: background .15s ease, color .15s ease, border-color .15s ease;
+    }
+    .plan-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .plan-btn.primary {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+    .plan-btn.primary:hover { background: var(--primary-dark); border-color: var(--primary-dark); color: #fff; }
+    .plan-btn:disabled { opacity: .8; cursor: default; }
+
+    .plan-group { margin-bottom: 24px; }
+    .plan-group:last-child { margin-bottom: 0; }
+    .plan-group h3 {
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin: 0 0 12px;
+    }
+    .plan-group.high h3 { color: #d64545; }
+    .plan-group.mid h3  { color: #c98a00; }
+    .plan-list { list-style: none; margin: 0; padding: 0; }
+    .plan-item {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      padding: 9px 0;
+      font-size: 15.5px;
+      color: var(--text);
+      line-height: 1.5;
+      border-bottom: 1px dashed var(--border);
+    }
+    .plan-item:last-child { border-bottom: none; }
+    .plan-marker { flex: 0 0 auto; font-size: 15px; line-height: 1.5; }
+    .plan-num { flex: 0 0 auto; font-weight: 700; color: var(--text-mute); }
+    .plan-text { flex: 1 1 auto; }
+
+    .plan-ok {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--primary-dark);
+      padding: 12px 0;
+      text-align: center;
+    }
+
+    /* ===== Ваши 5 первых действий =====
+       Обёртка; внутренние элементы (счётчики, кнопки, список) переиспользуют
+       классы .plan-* из существующей дизайн-системы. */
+    .top5-section { display: none; }
+    .top5-section.is-ready { display: block; }
+
+    /* Печать работает в режимах: класс на <body> задаётся перед window.print().
+       Каждый режим показывает только свой блок + результат аудита. */
+    @media print {
+      body { background: #fff; }
+      .site-header, .hero, #questions, #recommendations, .site-footer, .note { display: none !important; }
+      .section { padding: 16px 0 !important; }
+      .audit-score-card, .plan-stats { box-shadow: none !important; border: 1px solid #ccc !important; }
+      .plan-btn { display: none !important; }
+      .plan-section, .top5-section { display: none !important; }
+      body.print-plan .plan-section.is-ready { display: block !important; }
+      body.print-top5 .top5-section.is-ready { display: block !important; }
+    }
+  </style>
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">ЕСЛИ&nbsp;ОТКЛЮЧАТ</a>
+      <nav class="main-nav">
+        <a href="index.html#what">Что отключится</a>
+        <a href="index.html#prepare">Что подготовить</a>
+        <a href="index.html#family">Семье</a>
+        <a href="index.html#business">Бизнесу</a>
+        <a href="index.html#today">Сегодня</a>
+        <a href="about.html">О проекте</a>
+        <a href="checklist.html">Чек-лист</a>
+        <a href="resources.html">Ресурсы</a>
+        <a href="audit.html" class="active">Аудит</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- Заголовок страницы -->
+    <section class="hero hero-sub">
+      <div class="container hero-inner">
+        <p class="hero-eyebrow">Аудит</p>
+        <h1 class="hero-title">Аудит устойчивости</h1>
+        <p class="hero-subtitle">Проверьте готовность к перебоям — оценка от 0 до 100</p>
+        <p class="hero-lead">
+          20 коротких вопросов о связи, питании, воде, документах, данных и плане
+          действий. Отвечайте «Да», «Частично» или «Нет» — оценка и рекомендации
+          считаются автоматически, а результат сохраняется в вашем браузере.
+        </p>
+      </div>
+    </section>
+
+    <!-- Счётчик прогресса и оценка -->
+    <section class="section" style="padding-bottom: 0;">
+      <div class="container">
+        <p class="note">
+          Данные хранятся только в вашем браузере (localStorage) и никуда не
+          отправляются. Очистка истории браузера сбросит ответы.
+        </p>
+        <div class="audit-score-card">
+          <div class="score-block">
+            <p class="score-big"><span id="scoreNum">0</span><span class="score-max">/100</span></p>
+            <span class="score-badge low" id="scoreBadge">—</span>
+          </div>
+          <div class="score-info">
+            <h3 id="scoreTitle">Ваша оценка устойчивости</h3>
+            <div class="progress-track">
+              <div class="progress-fill" id="scoreFill"></div>
+            </div>
+            <p class="score-summary" id="scoreSummary">Отвечено: 0 из 20</p>
+          </div>
+          <div class="score-actions">
+            <button type="button" class="btn-reset" id="resetBtn">Пройти заново</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Ваши 5 первых действий (формируется после ответа на все вопросы) -->
+    <section class="section top5-section" id="top5Section" aria-live="polite">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">С чего начать</span>
+          <h2>Ваши 5 первых действий</h2>
+          <p class="section-intro">
+            Пять самых важных шагов, отобранных автоматически: сначала то, чего
+            нет совсем, затем что есть частично — в порядке жизненной важности.
+          </p>
+        </header>
+
+        <div id="top5Body">
+          <!-- Содержимое рендерится скриптом -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Мой план Б (формируется после ответа на все вопросы) -->
+    <section class="section plan-section" id="planSection" aria-live="polite">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">Персональный план</span>
+          <h2>Мой план Б</h2>
+          <p class="section-intro">
+            Сформирован по вашим ответам. Высокий приоритет — то, чего нет совсем;
+            средний — то, что есть частично.
+          </p>
+        </header>
+
+        <div id="planBody">
+          <!-- Содержимое рендерится скриптом -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Вопросы -->
+    <section class="section" id="questions">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">20 вопросов</span>
+          <h2>Ответьте на вопросы</h2>
+          <p class="section-intro">
+            Отмечайте один из трёх вариантов для каждого утверждения. Оценка
+            пересчитывается на лету.
+          </p>
+        </header>
+
+        <div class="grid cards" id="questionsGrid">
+
+          <article class="card audit-q" data-q="1" data-cat="Базовый запас"
+            data-rec="Храните около 3 л питьевой воды на человека в сутки минимум на 3–7 дней и регулярно обновляйте запас.">
+            <div class="q-head"><span class="q-num">01</span><span class="q-cat">Базовый запас</span></div>
+            <h3 class="q-title">У вас есть запас питьевой воды на 3–7 дней.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="2" data-cat="Базовый запас"
+            data-rec="Соберите нескоропортящиеся продукты: консервы, крупы, сухое молоко, чай — на несколько дней.">
+            <div class="q-head"><span class="q-num">02</span><span class="q-cat">Базовый запас</span></div>
+            <h3 class="q-title">Есть запас нескоропортящихся продуктов на несколько дней.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="3" data-cat="Базовый запас"
+            data-rec="Держите повербанки заряженными до 100% и запасите батарейки нужных типов.">
+            <div class="q-head"><span class="q-num">03</span><span class="q-cat">Базовый запас</span></div>
+            <h3 class="q-title">Повербанки заряжены, есть запас батареек нужных типов.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="4" data-cat="Базовый запас"
+            data-rec="Положите фонарики на каждый этаж и храните свечи со спичками в непромокаемой упаковке.">
+            <div class="q-head"><span class="q-num">04</span><span class="q-cat">Базовый запас</span></div>
+            <h3 class="q-title">Есть фонарики, свечи и спички в непромокаемой упаковке.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="5" data-cat="Базовый запас"
+            data-rec="Портативная газовая горелка с запасом баллонов позволит готовить и кипятить воду без электричества.">
+            <div class="q-head"><span class="q-num">05</span><span class="q-cat">Базовый запас</span></div>
+            <h3 class="q-title">Есть портативная газовая горелка с запасом баллонов.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="6" data-cat="Электричество"
+            data-rec="Источник бесперебойного питания (ИБП) поддержит роутер, холодильник или сервер при отключении.">
+            <div class="q-head"><span class="q-num">06</span><span class="q-cat">Электричество</span></div>
+            <h3 class="q-title">Есть ИБП для критичных устройств (роутер, холодильник, сервер).</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="7" data-cat="Финансы"
+            data-rec="Держите дома наличные мелкими и средними купюрами — при сбое терминалов это единственный способ оплаты.">
+            <div class="q-head"><span class="q-num">07</span><span class="q-cat">Финансы</span></div>
+            <h3 class="q-title">Дома есть наличные мелкими и средними купюрами.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="8" data-cat="Здоровье"
+            data-rec="Соберите аптечку (антисептики, бинты, жаропонижающие) и запас рецептурных лекарств на 2+ недели.">
+            <div class="q-head"><span class="q-num">08</span><span class="q-cat">Здоровье</span></div>
+            <h3 class="q-title">Есть аптечка и запас рецептурных лекарств на 2+ недели.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="9" data-cat="Документы"
+            data-rec="Сделайте бумажные копии паспортов, полисов и свидетельств в непромокаемой упаковке.">
+            <div class="q-head"><span class="q-num">09</span><span class="q-cat">Документы</span></div>
+            <h3 class="q-title">Есть бумажные копии паспортов, полисов и свидетельств.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="10" data-cat="Связь"
+            data-rec="Распечатайте телефоны близких, врачей и экстренных служб — офлайн-записная книжка.">
+            <div class="q-head"><span class="q-num">10</span><span class="q-cat">Связь</span></div>
+            <h3 class="q-title">Распечатан список контактов близких и экстренных служб.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="11" data-cat="Семья"
+            data-rec="Договоритесь о точке сбора дома и вне дома на случай, если связь не работает.">
+            <div class="q-head"><span class="q-num">11</span><span class="q-cat">Семья</span></div>
+            <h3 class="q-title">Семья договорилась о точке сбора дома и вне дома.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="12" data-cat="Семья"
+            data-rec="Выберите контакт «вне зоны» — родственника или друга в другом регионе для передачи сообщений.">
+            <div class="q-head"><span class="q-num">12</span><span class="q-cat">Семья</span></div>
+            <h3 class="q-title">Выбран контакт «вне зоны» в другом регионе.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="13" data-cat="Навигация"
+            data-rec="Скачайте офлайн-карты и справочники региона заранее, чтобы навигация работала без интернета.">
+            <div class="q-head"><span class="q-num">13</span><span class="q-cat">Навигация</span></div>
+            <h3 class="q-title">Скачаны офлайн-карты региона и нужные справочники.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="14" data-cat="Связь"
+            data-rec="Добавьте дублирующий канал связи: второго оператора, SMS-рассылку или рацию.">
+            <div class="q-head"><span class="q-num">14</span><span class="q-cat">Связь</span></div>
+            <h3 class="q-title">Есть дублирующие каналы связи (второй оператор, рация).</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="15" data-cat="Данные"
+            data-rec="Храните локальные резервные копии важных файлов — облако может оказаться недоступно.">
+            <div class="q-head"><span class="q-num">15</span><span class="q-cat">Данные</span></div>
+            <h3 class="q-title">Есть локальные резервные копии важных данных.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="16" data-cat="Данные"
+            data-rec="Продублируйте ключи доступа и пароли в офлайн-менеджере или на бумаге в надёжном месте.">
+            <div class="q-head"><span class="q-num">16</span><span class="q-cat">Данные</span></div>
+            <h3 class="q-title">Есть офлайн-копии ключей доступа и паролей.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="17" data-cat="Бизнес"
+            data-rec="Опишите, как бизнес продолжит операции при перебое: питание, оплата, запасные процессы.">
+            <div class="q-head"><span class="q-num">17</span><span class="q-cat">Бизнес</span></div>
+            <h3 class="q-title">Есть план продолжения работы бизнеса при сбое.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="18" data-cat="Бизнес"
+            data-rec="Распределите роли: связь, техника, клиенты, деньги — план должен работать и без одного руководителя.">
+            <div class="q-head"><span class="q-num">18</span><span class="q-cat">Бизнес</span></div>
+            <h3 class="q-title">В команде распределены роли на случай ЧП.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="19" data-cat="Финансы"
+            data-rec="Сформируйте финансовую подушку на операционные расходы при вынужденном простое.">
+            <div class="q-head"><span class="q-num">19</span><span class="q-cat">Финансы</span></div>
+            <h3 class="q-title">Есть финансовая подушка на период простоя.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+          <article class="card audit-q" data-q="20" data-cat="Семья"
+            data-rec="Обсудите план действий с семьёй и командой вслух — договорённости должны быть у всех.">
+            <div class="q-head"><span class="q-num">20</span><span class="q-cat">Семья</span></div>
+            <h3 class="q-title">План действий обсуждён с семьёй и/или командой.</h3>
+            <div class="q-options" role="group" aria-label="Варианты ответа">
+              <button type="button" class="q-opt" data-value="да">Да</button>
+              <button type="button" class="q-opt" data-value="частично">Частично</button>
+              <button type="button" class="q-opt" data-value="нет">Нет</button>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Рекомендации -->
+    <section class="section section-alt" id="recommendations">
+      <div class="container">
+        <header class="section-head">
+          <span class="section-tag">Рекомендации</span>
+          <h2>Что укрепить</h2>
+          <p class="section-intro">
+            Советы появляются по тем вопросам, где вы ответили «Частично» или «Нет».
+          </p>
+        </header>
+
+        <div id="recContainer" role="status" aria-live="polite">
+          <p class="rec-hint" id="recHint">Ответьте на все 20 вопросов, чтобы получить персональные рекомендации.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="container">
+      <p>ЕСЛИ ОТКЛЮЧАТ — План Б для людей и бизнеса. Аудит работает локально
+        в вашем браузере. Все материалы носят информационный характер.</p>
+    </div>
+  </footer>
+
+  <script>
+  (function () {
+    "use strict";
+
+    var STORAGE_KEY = "esli_otkluchat_audit_v1";
+
+    // Вес каждого варианта ответа (0–1). Итог = сумма весов / число вопросов × 100.
+    var WEIGHTS = { "да": 1, "частично": 0.5, "нет": 0 };
+
+    // Действия для раздела «Мой план Б». Ключ — номер вопроса.
+    // Для «Нет» — команда создать/купить; для «Частично» — проверить/обновить.
+    var PLAN_ACTIONS = {
+      "1":  { "нет": "Создать запас питьевой воды минимум на 3 дня.", "частично": "Дополнить запас воды до 3–7 дней на каждого человека." },
+      "2":  { "нет": "Собрать запас нескоропортящихся продуктов на несколько дней.", "частично": "Проверить и дополнить запас продуктов." },
+      "3":  { "нет": "Купить повербанки и запас батареек нужных типов.", "частично": "Зарядить повербанки и пополнить запас батареек." },
+      "4":  { "нет": "Купить фонарики, свечи и спички в непромокаемой упаковке.", "частично": "Проверить фонарики и укомплектовать спички и свечи." },
+      "5":  { "нет": "Приобрести портативную газовую горелку с запасом баллонов.", "частично": "Пополнить запас баллонов для горелки." },
+      "6":  { "нет": "Приобрести ИБП для критичных устройств.", "частично": "Проверить работу ИБП и ёмкость батарей." },
+      "7":  { "нет": "Подготовить наличные мелкими и средними купюрами.", "частично": "Пополнить запас наличных дома." },
+      "8":  { "нет": "Собрать аптечку и заложить запас лекарств на 2 недели.", "частично": "Проверить состав аптечки и сроки годности лекарств." },
+      "9":  { "нет": "Подготовить и распечатать копии основных документов семьи.", "частично": "Обновить копии документов и проверить их полноту." },
+      "10": { "нет": "Распечатать список контактов близких и экстренных служб.", "частично": "Обновить распечатанный список контактов." },
+      "11": { "нет": "Договориться с семьёй о точке сбора дома и вне дома.", "частично": "Уточнить и закрепить договорённости о точке сбора." },
+      "12": { "нет": "Выбрать контакт «вне зоны» в другом регионе.", "частично": "Подтвердить готовность контакта «вне зоны»." },
+      "13": { "нет": "Скачать офлайн-карты региона и справочники.", "частично": "Обновить офлайн-карты и проверить их работу." },
+      "14": { "нет": "Подключить дублирующий канал связи (второй оператор, рация).", "частично": "Проверить работоспособность запасных каналов связи." },
+      "15": { "нет": "Настроить локальные резервные копии важных данных.", "частично": "Проверить полноту резервных копий и обновить их." },
+      "16": { "нет": "Сохранить ключи доступа и пароли в офлайн-виде.", "частично": "Проверить и обновить офлайн-копии ключей и паролей." },
+      "17": { "нет": "Описать план продолжения работы бизнеса при сбое.", "частично": "Дополнить и проверить план работы бизнеса при сбое." },
+      "18": { "нет": "Распределить роли в команде на случай ЧП.", "частично": "Уточнить и закрепить распределение ролей в команде." },
+      "19": { "нет": "Сформировать финансовую подушку на период простоя.", "частично": "Пополнить финансовую подушку до целевого размера." },
+      "20": { "нет": "Обсудить план действий с семьёй и командой.", "частично": "Повторить обсуждение плана и проверить договорённости." }
+    };
+
+    // Порядок категорий в блоке рекомендаций.
+    var CATEGORY_ORDER = [
+      "Базовый запас", "Электричество", "Связь", "Навигация",
+      "Здоровье", "Документы", "Финансы", "Семья", "Данные", "Бизнес"
+    ];
+
+    var LEVELS = [
+      { max: 25, key: "risk",  label: "Высокий риск",       summary: "Готовность минимальна. Стоит срочно закрыть базовые провалы — вода, наличные, контакты и план семьи." },
+      { max: 50, key: "low",   label: "Низкая готовность",  summary: "Есть отдельные элементы, но важных звеньев не хватает. Начните с самого простого шага из рекомендаций." },
+      { max: 75, key: "mid",   label: "Средняя готовность", summary: "Хорошая база. Осталось закрыть узкие места — данные, дубли связи и план действий." },
+      { max: 100,key: "good",  label: "Хорошая готовность", summary: "Отличный результат. Регулярно проверяйте запасы и обновляйте план." }
+    ];
+
+    var cards        = Array.prototype.slice.call(document.querySelectorAll('.audit-q'));
+    var scoreNum     = document.getElementById('scoreNum');
+    var scoreBadge   = document.getElementById('scoreBadge');
+    var scoreFill    = document.getElementById('scoreFill');
+    var scoreSummary = document.getElementById('scoreSummary');
+    var resetBtn     = document.getElementById('resetBtn');
+    var recContainer = document.getElementById('recContainer');
+    var recHint      = document.getElementById('recHint');
+    var planSection  = document.getElementById('planSection');
+    var planBody     = document.getElementById('planBody');
+    var top5Section  = document.getElementById('top5Section');
+    var top5Body     = document.getElementById('top5Body');
+
+    var TOTAL = cards.length;
+
+    // ===== «Ваши 5 первых действий» =====
+    // Тема каждого вопроса и её приоритет (меньше = важнее).
+    // Базируется на порядке важности из ТЗ: вода, питание, лекарства, документы,
+    // связь (1) → электричество, наличные, семейный план, навигация (2) →
+    // бизнес и резервные улучшения (3).
+    var TOPIC_TIERS = {
+      "1":  { topic: "вода",            tier: 1 },
+      "2":  { topic: "питание",         tier: 1 },
+      "3":  { topic: "питание",         tier: 2 },
+      "4":  { topic: "резерв",          tier: 3 },
+      "5":  { topic: "питание",         tier: 2 },
+      "6":  { topic: "электричество",   tier: 2 },
+      "7":  { topic: "наличные",        tier: 2 },
+      "8":  { topic: "лекарства",       tier: 1 },
+      "9":  { topic: "документы",       tier: 1 },
+      "10": { topic: "связь",           tier: 1 },
+      "11": { topic: "семейный план",   tier: 2 },
+      "12": { topic: "семейный план",   tier: 2 },
+      "13": { topic: "навигация",       tier: 2 },
+      "14": { topic: "связь",           tier: 1 },
+      "15": { topic: "резерв",          tier: 3 },
+      "16": { topic: "резерв",          tier: 3 },
+      "17": { topic: "бизнес",          tier: 3 },
+      "18": { topic: "бизнес",          tier: 3 },
+      "19": { topic: "наличные",        tier: 2 },
+      "20": { topic: "семейный план",   tier: 2 }
+    };
+
+    // Действия для Top-5 в повелительной форме (обращение на «Вы»).
+    // «Нет» — действие создать/выполнить; «Частично» — проверить/дополнить.
+    var TOP5_ACTIONS = {
+      "1":  { "нет": "Создайте запас питьевой воды минимум на 3 дня.", "частично": "Дополните запас воды до 3–7 дней на каждого человека." },
+      "2":  { "нет": "Соберите запас нескоропортящихся продуктов на несколько дней.", "частично": "Проверьте и дополните запас продуктов." },
+      "3":  { "нет": "Зарядите повербанки и подготовьте запас батареек.", "частично": "Проверьте заряд повербанков и запас батареек." },
+      "4":  { "нет": "Приобретите фонарики, свечи и спички в непромокаемой упаковке.", "частично": "Проверьте фонарики и укомплектуйте свечи и спички." },
+      "5":  { "нет": "Приобретите портативную газовую горелку с запасом баллонов.", "частично": "Пополните запас баллонов для горелки." },
+      "6":  { "нет": "Подготовьте ИБП для критичных устройств (роутер, холодильник).", "частично": "Проверьте работу ИБП и ёмкость батарей." },
+      "7":  { "нет": "Подготовьте наличные мелкими и средними купюрами.", "частично": "Пополните запас наличных дома." },
+      "8":  { "нет": "Соберите домашнюю аптечку и запас необходимых лекарств.", "частично": "Проверьте состав аптечки и сроки годности лекарств." },
+      "9":  { "нет": "Сделайте бумажные копии документов семьи.", "частично": "Обновите копии документов и проверьте их полноту." },
+      "10": { "нет": "Запишите телефоны близких и экстренных служб на бумаге.", "частично": "Обновите распечатанный список контактов." },
+      "11": { "нет": "Договоритесь с семьёй о точке сбора дома и вне дома.", "частично": "Уточните и закрепите договорённости о точке сбора." },
+      "12": { "нет": "Выберите контакт «вне зоны» в другом регионе.", "частично": "Подтвердите готовность контакта «вне зоны»." },
+      "13": { "нет": "Скачайте офлайн-карты региона и справочники.", "частично": "Обновите офлайн-карты и проверьте их работу." },
+      "14": { "нет": "Подключите дублирующий канал связи (второй оператор, рация).", "частично": "Проверьте работоспособность запасных каналов связи." },
+      "15": { "нет": "Настройте локальные резервные копии важных данных.", "частично": "Проверьте полноту резервных копий и обновите их." },
+      "16": { "нет": "Сохраните ключи доступа и пароли в офлайн-виде.", "частично": "Проверьте и обновите офлайн-копии ключей и паролей." },
+      "17": { "нет": "Опишите план продолжения работы бизнеса при сбое.", "частично": "Дополните и проверьте план работы бизнеса при сбое." },
+      "18": { "нет": "Распределите роли в команде на случай ЧП.", "частично": "Уточните и закрепите распределение ролей в команде." },
+      "19": { "нет": "Сформируйте финансовую подушку на период простоя.", "частично": "Пополните финансовую подушку до целевого размера." },
+      "20": { "нет": "Обсудите план действий с семьёй и командой.", "частично": "Повторите обсуждение плана и проверьте договорённости." }
+    };
+
+    // Поддержка localStorage (на случай file:// с ограничениями)
+    function storeAvailable() {
+      try { var t = "__eo_test__"; localStorage.setItem(t, "1"); localStorage.removeItem(t); return true; }
+      catch (e) { return false; }
+    }
+    var HAS_STORE = storeAvailable();
+
+    // Текущие ответы: { "1": "да", "2": "частично", ... }
+    function getAnswers() {
+      var state = {};
+      cards.forEach(function (card) {
+        var pressed = card.querySelector('.q-opt[aria-pressed="true"]');
+        state[card.getAttribute('data-q')] = pressed ? pressed.getAttribute('data-value') : null;
+      });
+      return state;
+    }
+
+    function computeScore(answers) {
+      var sum = 0;
+      cards.forEach(function (card) {
+        var v = answers[card.getAttribute('data-q')];
+        if (v && WEIGHTS.hasOwnProperty(v)) sum += WEIGHTS[v];
+      });
+      return TOTAL ? Math.round(sum / TOTAL * 100) : 0;
+    }
+
+    function levelFor(score) {
+      for (var i = 0; i < LEVELS.length; i++) {
+        if (score <= LEVELS[i].max) return LEVELS[i];
+      }
+      return LEVELS[LEVELS.length - 1];
+    }
+
+    function countAnswered(answers) {
+      var n = 0;
+      for (var k in answers) { if (answers.hasOwnProperty(k) && answers[k]) n++; }
+      return n;
+    }
+
+    function render() {
+      var answers = getAnswers();
+      var score = computeScore(answers);
+      var level = levelFor(score);
+      var answered = countAnswered(answers);
+      var allAnswered = answered === TOTAL;
+
+      // Оценка
+      scoreNum.textContent = score;
+      scoreBadge.textContent = level.label;
+      scoreBadge.className = 'score-badge ' + level.key;
+      scoreFill.style.width = score + '%';
+      scoreSummary.textContent = allAnswered
+        ? 'Отвечено: ' + answered + ' из ' + TOTAL + '. ' + level.summary
+        : 'Отвечено: ' + answered + ' из ' + TOTAL + ' — ответьте на все вопросы для точной оценки.';
+
+      // Рекомендации — только когда всё отвечено
+      renderRecommendations(answers, allAnswered);
+
+      // Ваши 5 первых действий — только когда всё отвечено
+      renderTop5(answers, allAnswered);
+
+      // План Б — только когда всё отвечено
+      renderPlan(answers, allAnswered);
+
+      // Сохранение результата
+      save({ answers: answers, score: score, level: level.key, date: Date.now() });
+    }
+
+    function renderRecommendations(answers, allAnswered) {
+      if (!allAnswered) {
+        recContainer.innerHTML = '';
+        recContainer.appendChild(recHint);
+        return;
+      }
+
+      // Собираем слабые места (Частично / Нет), сгруппированные по категориям
+      var groups = {};
+      cards.forEach(function (card) {
+        var id = card.getAttribute('data-q');
+        var v = answers[id];
+        if (v === 'нет' || v === 'частично') {
+          var cat = card.getAttribute('data-cat') || 'Прочее';
+          if (!groups[cat]) groups[cat] = [];
+          groups[cat].push({
+            value: v,
+            text: card.getAttribute('data-rec')
+          });
+        }
+      });
+
+      var html = '<p class="rec-intro">Ниже — шаги по зонам, где есть запас роста. Начните с категории «Базовый запас».</p>';
+      var hasAny = false;
+
+      CATEGORY_ORDER.forEach(function (cat) {
+        if (!groups[cat]) return;
+        hasAny = true;
+        html += '<div class="rec-group"><h3>' + cat + '</h3>';
+        // Сначала «Нет», затем «Частично» — приоритет закрытия
+        groups[cat].sort(function (a, b) {
+          var order = { 'нет': 0, 'частично': 1 };
+          return order[a.value] - order[b.value];
+        });
+        groups[cat].forEach(function (item) {
+          var mark = item.value === 'нет' ? 'нет' : 'частично';
+          html += '<div class="rec-item"><span><strong>' + mark + '</strong> — ' + item.text + '</span></div>';
+        });
+        html += '</div>';
+      });
+
+      if (!hasAny) {
+        html = '<p class="rec-ok">На все вопросы вы ответили «Да». Базовая устойчивость закрыта — продолжайте поддерживать запасы и периодически перепроверяйте план.</p>';
+      }
+
+      recContainer.innerHTML = html;
+    }
+
+    // ===== Общие хелперы для кнопок «Скопировать» и «Распечатать» =====
+    // Резервный способ копирования для сред без navigator.clipboard
+    function fallbackCopy(text) {
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.setAttribute('readonly', '');
+        ta.style.position = 'absolute';
+        ta.style.left = '-9999px';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      } catch (e) { /* буфер недоступен — игнорируем */ }
+    }
+
+    // Копирует текст, показывая обратную связь на кнопке.
+    function doCopy(btn, plainText) {
+      if (!btn || btn.disabled || !plainText) return;
+      function done() {
+        var original = btn.textContent;
+        btn.textContent = '✓ Скопировано';
+        btn.disabled = true;
+        setTimeout(function () {
+          btn.textContent = original;
+          btn.disabled = false;
+        }, 2000);
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(plainText).then(done).catch(function () {
+          fallbackCopy(plainText); done();
+        });
+      } else {
+        fallbackCopy(plainText); done();
+      }
+    }
+
+    // Печатает только указанный блок: добавляет класс на <body>, печатает,
+    // затем убирает класс. Оценка аудита видна всегда (в @media print).
+    function doPrint(mode) {
+      document.body.classList.add('print-' + mode);
+      window.print();
+      // Снимаем класс после завершения печати (в т.ч. по отмене)
+      setTimeout(function () {
+        document.body.classList.remove('print-' + mode);
+      }, 500);
+    }
+
+    // ===== «Ваши 5 первых действий» =====
+    // Отбирает до 5 самых важных действий:
+    // 1) сначала все ответы «Нет», затем «Частично»;
+    // 2) внутри группы — по приоритету темы (tier): вода/питание/лекарства/
+    //    документы/связь → электричество/наличные/семья/навигация → бизнес/резерв;
+    // 3) при равенстве — по номеру вопроса (порядок в опроснике).
+    function buildTop5(answers) {
+      var pool = [];
+      cards.forEach(function (card) {
+        var id = card.getAttribute('data-q');
+        var v = answers[id];
+        var actions = TOP5_ACTIONS[id];
+        if (!actions) return;
+        var text = null;
+        if (v === 'нет' && actions['нет']) {
+          text = actions['нет'];
+        } else if (v === 'частично' && actions['частично']) {
+          text = actions['частично'];
+        }
+        if (text) {
+          var meta = TOPIC_TIERS[id] || { topic: 'прочее', tier: 9 };
+          // priority: «Нет»=0 (важнее), «Частично»=1
+          var priority = (v === 'нет') ? 0 : 1;
+          pool.push({
+            text: text,
+            marker: (v === 'нет') ? '🔴' : '🟡',
+            priority: priority,
+            tier: meta.tier,
+            q: parseInt(id, 10) || 0
+          });
+        }
+      });
+
+      pool.sort(function (a, b) {
+        if (a.priority !== b.priority) return a.priority - b.priority; // Нет раньше Частично
+        if (a.tier !== b.tier) return a.tier - b.tier;                 // важнее тема — раньше
+        return a.q - b.q;                                              // стабильно по номеру
+      });
+
+      var top5 = pool.slice(0, 5);
+      var high = top5.filter(function (t) { return t.priority === 0; });
+      var mid  = top5.filter(function (t) { return t.priority === 1; });
+      return { list: top5, high: high, mid: mid };
+    }
+
+    function renderTop5(answers, allAnswered) {
+      if (!allAnswered) {
+        top5Section.classList.remove('is-ready');
+        top5Body.innerHTML = '';
+        return;
+      }
+
+      var top5 = buildTop5(answers);
+      top5Section.classList.add('is-ready');
+
+      // Все ответы «Да» — критических задач нет
+      if (top5.list.length === 0) {
+        top5Body.innerHTML =
+          '<p class="plan-ok">Отлично. Критических задач не выявлено. Поддерживайте запасы и регулярно перепроверяйте план.</p>' +
+          '<div class="plan-actions">' +
+            '<button type="button" class="plan-btn primary" id="copyTop5Btn" disabled>Скопировать список</button>' +
+            '<button type="button" class="plan-btn" id="printTop5Btn">Распечатать список</button>' +
+          '</div>';
+        bindTop5Buttons('');
+        return;
+      }
+
+      var html = '';
+
+      // Счётчики
+      html += '<div class="plan-stats">';
+      html += '<div class="plan-stat high"><strong>' + top5.high.length + '</strong>Критических задач</div>';
+      html += '<div class="plan-stat mid"><strong>' + top5.mid.length + '</strong>Задач среднего приоритета</div>';
+      html += '</div>';
+
+      // Кнопки
+      html += '<div class="plan-actions">';
+      html += '<button type="button" class="plan-btn primary" id="copyTop5Btn">Скопировать список</button>';
+      html += '<button type="button" class="plan-btn" id="printTop5Btn">Распечатать список</button>';
+      html += '</div>';
+
+      // Нумерованный список отобранных действий с маркерами
+      html += '<ul class="plan-list">';
+      top5.list.forEach(function (item, i) {
+        html += '<li class="plan-item"><span class="plan-marker">' + item.marker + '</span>' +
+                '<span class="plan-num">' + (i + 1) + '.</span>' +
+                '<span class="plan-text">' + escapeHtml(item.text) + '</span></li>';
+      });
+      html += '</ul>';
+
+      top5Body.innerHTML = html;
+      bindTop5Buttons(buildTop5Text(top5));
+    }
+
+    // Текст списка для копирования в буфер обмена (без HTML).
+    function buildTop5Text(top5) {
+      var L = '\n';
+      var t = 'ВАШИ 5 ПЕРВЫХ ДЕЙСТВИЙ' + L + L;
+      t += 'Критических задач: ' + top5.high.length + L;
+      t += 'Задач среднего приоритета: ' + top5.mid.length + L;
+      t += L;
+      top5.list.forEach(function (item, i) {
+        t += (i + 1) + '. ' + item.marker + ' ' + item.text + L;
+      });
+      t += L + '— Сформировано на сайте «ЕСЛИ ОТКЛЮЧАТ»';
+      return t;
+    }
+
+    // Привязка кнопок копирования и печати для Top-5
+    function bindTop5Buttons(plainText) {
+      var copyBtn  = document.getElementById('copyTop5Btn');
+      var printBtn = document.getElementById('printTop5Btn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', function () { doCopy(copyBtn, plainText); });
+      }
+      if (printBtn) {
+        printBtn.addEventListener('click', function () { doPrint('top5'); });
+      }
+    }
+
+    // ===== Мой план Б =====
+    // Собирает две группы действий: высокого (Нет) и среднего (Частично) приоритета.
+    function buildPlanItems(answers) {
+      var high = [];
+      var mid = [];
+      cards.forEach(function (card) {
+        var id = card.getAttribute('data-q');
+        var v = answers[id];
+        var actions = PLAN_ACTIONS[id];
+        if (!actions) return;
+        if (v === 'нет' && actions['нет']) {
+          high.push(actions['нет']);
+        } else if (v === 'частично' && actions['частично']) {
+          mid.push(actions['частично']);
+        }
+      });
+      return { high: high, mid: mid };
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function renderPlan(answers, allAnswered) {
+      if (!allAnswered) {
+        planSection.classList.remove('is-ready');
+        planBody.innerHTML = '';
+        return;
+      }
+
+      var items = buildPlanItems(answers);
+      var totalTasks = items.high.length + items.mid.length;
+      planSection.classList.add('is-ready');
+
+      // Все ответы «Да» — критических пробелов нет
+      if (totalTasks === 0) {
+        planBody.innerHTML =
+          '<p class="plan-ok">Отлично. По результатам аудита критических пробелов не обнаружено.</p>' +
+          '<div class="plan-actions">' +
+            '<button type="button" class="plan-btn primary" id="copyPlanBtn" disabled>Скопировать мой план Б</button>' +
+            '<button type="button" class="plan-btn" id="printPlanBtn">Распечатать мой план Б</button>' +
+          '</div>';
+        bindPlanButtons('');
+        return;
+      }
+
+      // Счётчики
+      var html = '<div class="plan-stats">';
+      html += '<div class="plan-stat high"><strong>' + items.high.length + '</strong>Критических задач</div>';
+      html += '<div class="plan-stat mid"><strong>' + items.mid.length + '</strong>Задач среднего приоритета</div>';
+      html += '</div>';
+
+      // Кнопки
+      html += '<div class="plan-actions">';
+      html += '<button type="button" class="plan-btn primary" id="copyPlanBtn">Скопировать мой план Б</button>';
+      html += '<button type="button" class="plan-btn" id="printPlanBtn">Распечатать мой план Б</button>';
+      html += '</div>';
+
+      // Высокий приоритет
+      if (items.high.length) {
+        html += '<div class="plan-group high"><h3>Высокий приоритет</h3><ul class="plan-list">';
+        items.high.forEach(function (text, i) {
+          html += '<li class="plan-item"><span class="plan-marker">🔴</span>' +
+                  '<span class="plan-num">' + (i + 1) + '.</span>' +
+                  '<span class="plan-text">' + escapeHtml(text) + '</span></li>';
+        });
+        html += '</ul></div>';
+      }
+
+      // Средний приоритет
+      if (items.mid.length) {
+        html += '<div class="plan-group mid"><h3>Средний приоритет</h3><ul class="plan-list">';
+        items.mid.forEach(function (text, i) {
+          html += '<li class="plan-item"><span class="plan-marker">🟡</span>' +
+                  '<span class="plan-num">' + (i + 1) + '.</span>' +
+                  '<span class="plan-text">' + escapeHtml(text) + '</span></li>';
+        });
+        html += '</ul></div>';
+      }
+
+      planBody.innerHTML = html;
+
+      // Текст для копирования (простой текст, без HTML)
+      bindPlanButtons(buildPlanText(items));
+    }
+
+    // Формирует обычный текст плана для копирования в буфер обмена.
+    function buildPlanText(items) {
+      var L = '\n';
+      var t = 'МОЙ ПЛАН Б' + L + L;
+      t += 'Критических задач: ' + items.high.length + L;
+      t += 'Задач среднего приоритета: ' + items.mid.length + L;
+      t += L;
+
+      if (items.high.length) {
+        t += 'ВЫСОКИЙ ПРИОРИТЕТ' + L;
+        items.high.forEach(function (text, i) {
+          t += (i + 1) + '. 🔴 ' + text + L;
+        });
+        t += L;
+      }
+      if (items.mid.length) {
+        t += 'СРЕДНИЙ ПРИОРИТЕТ' + L;
+        items.mid.forEach(function (text, i) {
+          t += (i + 1) + '. 🟡 ' + text + L;
+        });
+        t += L;
+      }
+      t += L + '— Сформировано на сайте «ЕСЛИ ОТКЛЮЧАТ»';
+      return t;
+    }
+
+    // Привязка кнопок копирования и печати для «Моего плана Б»
+    function bindPlanButtons(plainText) {
+      var copyBtn  = document.getElementById('copyPlanBtn');
+      var printBtn = document.getElementById('printPlanBtn');
+      if (copyBtn) {
+        copyBtn.addEventListener('click', function () { doCopy(copyBtn, plainText); });
+      }
+      if (printBtn) {
+        printBtn.addEventListener('click', function () { doPrint('plan'); });
+      }
+    }
+
+    function save(data) {
+      if (!HAS_STORE) return;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+      catch (e) { /* квота переполнена — игнорируем */ }
+    }
+
+    function load() {
+      if (!HAS_STORE) return;
+      var saved = {};
+      try { saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; }
+      catch (e) { saved = {}; }
+      var answers = saved.answers || {};
+      cards.forEach(function (card) {
+        var id = card.getAttribute('data-q');
+        var v = answers[id];
+        if (v) {
+          var btn = card.querySelector('.q-opt[data-value="' + v + '"]');
+          if (btn) btn.setAttribute('aria-pressed', 'true');
+        }
+      });
+    }
+
+    // Обработка кликов по вариантам ответа
+    cards.forEach(function (card) {
+      var opts = Array.prototype.slice.call(card.querySelectorAll('.q-opt'));
+      opts.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var value = btn.getAttribute('data-value');
+          var wasPressed = btn.getAttribute('aria-pressed') === 'true';
+          // Сбрасываем все варианты в текущем вопросе
+          opts.forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+          // Повторный клик по выбранному — снимает выбор
+          if (!wasPressed) btn.setAttribute('aria-pressed', 'true');
+          render();
+        });
+      });
+    });
+
+    // Сброс
+    resetBtn.addEventListener('click', function () {
+      if (!confirm('Сбросить все ответы аудита? Это действие нельзя отменить.')) return;
+      cards.forEach(function (card) {
+        var opts = Array.prototype.slice.call(card.querySelectorAll('.q-opt'));
+        opts.forEach(function (o) { o.setAttribute('aria-pressed', 'false'); });
+      });
+      if (HAS_STORE) {
+        try { localStorage.removeItem(STORAGE_KEY); } catch (e) {}
+      }
+      render();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+
+    load();
+    render();
+  })();
+  </script>
+
+  <script src="app.js" defer></script>
+  <script src="plan-tools.js" defer></script>
+
+</body>
+</html>

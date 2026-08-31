@@ -1,0 +1,105 @@
+/* Shared MVP additions */
+.menu-toggle {
+  display: none;
+  width: 44px;
+  height: 44px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  cursor: pointer;
+}
+.menu-toggle span {
+  display: block;
+  height: 2px;
+  margin: 5px 0;
+  background: var(--text);
+  border-radius: 2px;
+}
+
+.plan-data-card { margin-top: 16px; }
+.plan-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.plan-tools input[type="file"] { max-width: 100%; }
+
+.rec-item .action-link {
+  display: inline-block;
+  margin: 8px 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.check-item.action-target {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(31, 111, 139, .14), var(--shadow);
+  opacity: 1;
+}
+
+.feedback-row {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.feedback-row .action-link { font-weight: 700; }
+.feedback-copy {
+  border: 0;
+  background: transparent;
+  color: var(--text-mute);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+}
+.feedback-copy:hover { color: var(--primary); }
+
+@media (max-width: 720px) {
+  .header-inner { height: 64px; }
+  .menu-toggle { display: block; }
+  .main-nav {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+    padding: 12px 24px 20px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    flex-direction: column;
+    gap: 0;
+  }
+  .main-nav.is-open { display: flex; }
+  .main-nav a { display: block; padding: 11px 0; }
+  body.nav-open { overflow: hidden; }
+  .rec-item .action-link { display: block; margin-left: 0; white-space: normal; }
+}
+
+@media print {
+  .site-header,
+  .site-footer,
+  .hero-actions,
+  .menu-toggle,
+  .btn,
+  .btn-reset,
+  .plan-tools,
+  .feedback-row,
+  .action-link { display: none !important; }
+  body { background: #fff !important; color: #000 !important; }
+  .section, .hero { padding: 18px 0 !important; background: #fff !important; }
+  .card, .progress-card, .audit-score-card, .plan-stats, .check-item {
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+  a { color: #000 !important; text-decoration: none !important; }
+}
