@@ -1,4 +1,4 @@
-const CACHE_NAME = 'esli-otklyuchat-v6';
+const CACHE_NAME = 'esli-otklyuchat-v7';
 const APP_SHELL = [
   './',
   './index.html',
@@ -6,6 +6,7 @@ const APP_SHELL = [
   './checklist.html',
   './resources.html',
   './audit.html',
+  './privacy.html',
   './styles.css',
   './app.css',
   './app.js',
