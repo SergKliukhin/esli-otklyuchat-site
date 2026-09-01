@@ -123,6 +123,150 @@
     });
   }
 
+  function injectAuditCategoryProfile() {
+    var scoreCard = document.querySelector('.audit-score-card');
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.audit-q[data-cat]'));
+    if (!scoreCard || !cards.length || document.getElementById('categoryProfileSection')) return;
+
+    var scoreSection = scoreCard.closest('.section');
+    if (!scoreSection || !scoreSection.parentNode) return;
+
+    var section = document.createElement('section');
+    section.className = 'section category-profile-section';
+    section.id = 'categoryProfileSection';
+    section.hidden = true;
+    section.setAttribute('aria-live', 'polite');
+    section.innerHTML =
+      '<div class="container">' +
+        '<header class="section-head">' +
+          '<span class="section-tag">Профиль устойчивости</span>' +
+          '<h2>Сильные и слабые зоны</h2>' +
+          '<p class="section-intro">Сравнение готовности по категориям аудита. Сначала показаны зоны, которые требуют большего внимания.</p>' +
+        '</header>' +
+        '<div class="category-profile-summary" id="categoryProfileSummary"></div>' +
+        '<div class="category-profile-list" id="categoryProfileList"></div>' +
+        '<p class="category-profile-note">Процент показывает долю готовности по вашим ответам внутри категории. Это не прогноз вероятности отключения или чрезвычайной ситуации.</p>' +
+      '</div>';
+    scoreSection.parentNode.insertBefore(section, scoreSection.nextSibling);
+
+    var summary = document.getElementById('categoryProfileSummary');
+    var list = document.getElementById('categoryProfileList');
+    var WEIGHTS = { 'да': 1, 'частично': 0.5, 'нет': 0 };
+
+    function escapeText(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function selectedValue(card) {
+      var pressed = card.querySelector('.q-opt[aria-pressed="true"]');
+      return pressed ? pressed.getAttribute('data-value') : null;
+    }
+
+    function bandFor(score) {
+      if (score <= 40) return { key: 'weak', label: 'Слабая зона' };
+      if (score <= 75) return { key: 'watch', label: 'Требует внимания' };
+      return { key: 'strong', label: 'Сильная зона' };
+    }
+
+    function formatNames(names) {
+      if (names.length <= 3) return names.join(', ');
+      return names.slice(0, 3).join(', ') + ' и ещё ' + (names.length - 3);
+    }
+
+    function renderProfile() {
+      var answered = 0;
+      var categories = {};
+      var order = 0;
+
+      cards.forEach(function (card) {
+        var name = card.getAttribute('data-cat') || 'Прочее';
+        if (!categories[name]) {
+          categories[name] = {
+            name: name,
+            order: order++,
+            sum: 0,
+            total: 0,
+            yes: 0,
+            partial: 0,
+            no: 0
+          };
+        }
+
+        var category = categories[name];
+        var value = selectedValue(card);
+        category.total += 1;
+        if (!value) return;
+
+        answered += 1;
+        category.sum += WEIGHTS.hasOwnProperty(value) ? WEIGHTS[value] : 0;
+        if (value === 'да') category.yes += 1;
+        if (value === 'частично') category.partial += 1;
+        if (value === 'нет') category.no += 1;
+      });
+
+      if (answered !== cards.length) {
+        section.hidden = true;
+        summary.innerHTML = '';
+        list.innerHTML = '';
+        return;
+      }
+
+      var rows = Object.keys(categories).map(function (name) {
+        var item = categories[name];
+        item.score = item.total ? Math.round(item.sum / item.total * 100) : 0;
+        item.band = bandFor(item.score);
+        return item;
+      });
+
+      rows.sort(function (a, b) {
+        if (a.score !== b.score) return a.score - b.score;
+        return a.order - b.order;
+      });
+
+      section.hidden = false;
+
+      var weakest = rows[0].score;
+      var strongest = rows[rows.length - 1].score;
+      if (weakest === strongest) {
+        summary.innerHTML = '<strong>Все категории сейчас на одном уровне:</strong> ' + weakest + '%.';
+      } else {
+        var weakNames = rows.filter(function (row) { return row.score === weakest; }).map(function (row) { return row.name; });
+        var strongNames = rows.filter(function (row) { return row.score === strongest; }).map(function (row) { return row.name; });
+        summary.innerHTML = '<strong>Приоритет для улучшения:</strong> ' + escapeText(formatNames(weakNames)) +
+          '. <strong>Сильнее всего:</strong> ' + escapeText(formatNames(strongNames)) + '.';
+      }
+
+      var html = '';
+      rows.forEach(function (row) {
+        html += '<div class="category-profile-row is-' + row.band.key + '">';
+        html += '<div class="category-profile-head"><span class="category-profile-name">' + escapeText(row.name) +
+          '</span><strong class="category-profile-score">' + row.score + '%</strong></div>';
+        html += '<div class="category-profile-track" role="progressbar" aria-label="' + escapeText(row.name) +
+          ': ' + row.score + '%" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + row.score + '">';
+        html += '<span class="category-profile-fill" style="width:' + row.score + '%"></span></div>';
+        html += '<div class="category-profile-meta"><span class="category-profile-status">' + row.band.label +
+          '</span><span>Да: ' + row.yes + ' · Частично: ' + row.partial + ' · Нет: ' + row.no + '</span></div>';
+        html += '</div>';
+      });
+      list.innerHTML = html;
+    }
+
+    cards.forEach(function (card) {
+      Array.prototype.slice.call(card.querySelectorAll('.q-opt')).forEach(function (button) {
+        button.addEventListener('click', renderProfile);
+      });
+    });
+
+    var reset = document.getElementById('resetBtn');
+    if (reset) reset.addEventListener('click', renderProfile);
+    renderProfile();
+  }
+
   function linkAuditRecommendations() {
     var container = document.getElementById('recContainer');
     if (!container) return;
@@ -184,6 +328,7 @@
   }
 
   injectPlanTools();
+  injectAuditCategoryProfile();
   linkAuditRecommendations();
   highlightChecklistTarget();
   injectFeedback();

@@ -61,6 +61,75 @@
 }
 .feedback-copy:hover { color: var(--primary); }
 
+.category-profile-section[hidden] { display: none; }
+.category-profile-summary {
+  margin-bottom: 20px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text-soft);
+  line-height: 1.55;
+}
+.category-profile-list {
+  display: grid;
+  gap: 14px;
+}
+.category-profile-row {
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.category-profile-head,
+.category-profile-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.category-profile-head { margin-bottom: 10px; }
+.category-profile-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.category-profile-score {
+  flex: 0 0 auto;
+  font-size: 18px;
+  color: var(--text);
+}
+.category-profile-track {
+  height: 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(107, 114, 128, .14);
+}
+.category-profile-fill {
+  display: block;
+  height: 100%;
+  min-width: 2px;
+  border-radius: inherit;
+}
+.category-profile-row.is-weak .category-profile-fill { background: #d64545; }
+.category-profile-row.is-watch .category-profile-fill { background: #c98a00; }
+.category-profile-row.is-strong .category-profile-fill { background: var(--accent); }
+.category-profile-meta {
+  margin-top: 9px;
+  font-size: 13px;
+  color: var(--text-mute);
+}
+.category-profile-status { font-weight: 700; }
+.category-profile-row.is-weak .category-profile-status { color: #b93434; }
+.category-profile-row.is-watch .category-profile-status { color: #9a6a00; }
+.category-profile-row.is-strong .category-profile-status { color: var(--primary); }
+.category-profile-note {
+  margin: 16px 0 0;
+  font-size: 13px;
+  color: var(--text-mute);
+  line-height: 1.5;
+}
+
 @media (max-width: 720px) {
   .header-inner { height: 64px; }
   .menu-toggle { display: block; }
@@ -85,6 +154,15 @@
   .rec-item .action-link { display: block; margin-left: 0; white-space: normal; }
 }
 
+@media (max-width: 560px) {
+  .category-profile-row { padding: 14px; }
+  .category-profile-meta {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+}
+
 @media print {
   .site-header,
   .site-footer,
@@ -97,9 +175,12 @@
   .action-link { display: none !important; }
   body { background: #fff !important; color: #000 !important; }
   .section, .hero { padding: 18px 0 !important; background: #fff !important; }
-  .card, .progress-card, .audit-score-card, .plan-stats, .check-item {
+  .card, .progress-card, .audit-score-card, .plan-stats, .check-item,
+  .category-profile-row, .category-profile-summary {
     box-shadow: none !important;
     break-inside: avoid;
   }
+  body.print-plan .category-profile-section,
+  body.print-top5 .category-profile-section { display: none !important; }
   a { color: #000 !important; text-decoration: none !important; }
 }
