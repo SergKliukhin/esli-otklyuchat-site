@@ -135,6 +135,14 @@
     if (p) p.textContent = text;
   }
 
+  function setStepText(sectionSelector, heading, text) {
+    Array.prototype.slice.call(document.querySelectorAll(sectionSelector + ' .steps li')).forEach(function (item) {
+      var h3 = item.querySelector('h3');
+      var p = item.querySelector('p');
+      if (h3 && p && h3.textContent.trim() === heading) p.textContent = text;
+    });
+  }
+
   function addNoteOnce(container, text, key) {
     if (!container || document.querySelector('[data-launch-note="' + key + '"]')) return;
     var note = document.createElement('p');
@@ -155,6 +163,7 @@
     setCardText('#prepare', 'Аптечка и лекарства', 'Домашняя аптечка, расходные материалы и запас необходимых препаратов, назначенных врачом, с учётом условий хранения и правил отпуска.');
     setCardText('#business', 'Резервное питание', 'ИБП, инвертор или другой резерв подбирайте по мощности и пусковым токам критичных устройств. Генератор при необходимости размещают вне помещений и эксплуатируют строго по инструкции.');
     setCardText('#business', 'Приём оплаты', 'Продумайте резерв при сбое эквайринга. При расчётах соблюдайте требования к применению ККТ: отсутствие интернета само по себе не отменяет формирование кассового чека.');
+    setStepText('#family', 'Ближайшая помощь', 'Заранее знайте адреса ближайших больниц и аптек, а также официальные каналы, где при чрезвычайной ситуации публикуют адреса пунктов обогрева или временного размещения.');
 
     var businessIntro = document.querySelector('#business .section-intro');
     if (businessIntro) businessIntro.textContent = 'Цель — пережить перебой без потери данных, клиентов и доверия. Один из полезных показателей готовности — сколько часов критичные процессы способны работать автономно.';
@@ -174,6 +183,7 @@
     setCheckLabel('base-candles', 'Свечи — только дополнительный резерв света; использовать под постоянным присмотром');
     setCheckLabel('base-stove', 'Портативная газовая горелка — только для использования на открытом воздухе по инструкции');
     setCheckLabel('base-meds', 'Запас необходимых назначенных врачом лекарств с учётом правил отпуска и хранения');
+    setCheckLabel('family-warm', 'Известно, где проверять официальные адреса пунктов обогрева или временного размещения при их открытии');
     setCheckLabel('business-ups', 'Резервное питание критичных систем подобрано по мощности и пусковым токам');
     setCheckLabel('business-gen', 'Генератор при необходимости — с безопасным размещением вне помещений по инструкции');
     setCheckLabel('business-keys', 'Защищённая офлайн-копия ключей доступа и паролей');
@@ -209,6 +219,9 @@
 
       var desc = card.querySelector('.card-desc');
       if (!desc) return;
+      if (title === 'Запасные каналы связи') {
+        desc.textContent = 'Дублирующие способы связи: второй оператор или eSIM в другой сети, SMS при недоступности мобильного интернета и заранее согласованные точки встречи.';
+      }
       if (title === 'Аптечка первой помощи') {
         desc.textContent = 'Базовая аптечка, расходные материалы и необходимые препараты, назначенные врачом. Учитывайте сроки годности, условия хранения и правила отпуска.';
       }
@@ -264,6 +277,49 @@
     }
   }
 
+  function cleanVisibleText(root) {
+    if (!root) return '';
+    var clone = root.cloneNode(true);
+    Array.prototype.slice.call(clone.querySelectorAll('button, .plan-actions, .plan-btn')).forEach(function (node) { node.remove(); });
+    return (clone.innerText || clone.textContent || '').replace(/\n{3,}/g, '\n\n').trim();
+  }
+
+  function copyText(text, button) {
+    function done() {
+      if (!button) return;
+      var old = button.textContent;
+      button.textContent = 'Скопировано';
+      setTimeout(function () { button.textContent = old; }, 1500);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(done).catch(function () {});
+      return;
+    }
+    var ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.left = '-9999px';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) {}
+    ta.remove();
+  }
+
+  function interceptAuditCopyButtons() {
+    if (pageName() !== 'audit.html') return;
+    document.addEventListener('click', function (event) {
+      var button = event.target.closest('#copyPlanBtn, #copyTop5Btn');
+      if (!button) return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      var isPlan = button.id === 'copyPlanBtn';
+      var root = document.getElementById(isPlan ? 'planBody' : 'top5Body');
+      var title = isPlan ? 'МОЙ ПЛАН Б' : 'МОИ 5 ПЕРВЫХ ДЕЙСТВИЙ';
+      copyText(title + '\n\n' + cleanVisibleText(root) + '\n\n— Сформировано на сайте «ЕСЛИ ОТКЛЮЧАТ»', button);
+    }, true);
+  }
+
   function patchAudit() {
     if (pageName() !== 'audit.html') return;
 
@@ -272,6 +328,7 @@
     updateAuditCard('6', 'Резервное питание критичных устройств подобрано по мощности и пусковым токам.', 'Подберите ИБП или другое резервное питание под фактическую мощность и пусковые токи устройств; для генератора заранее определите безопасное размещение вне помещений.');
     updateAuditCard('7', 'Дома есть разумный резерв наличных мелкими и средними купюрами.', 'Держите разумный резерв наличных мелкими и средними купюрами на случай временной недоступности эквайринга или банкоматов.');
     updateAuditCard('8', 'Есть аптечка и запас необходимых назначенных врачом лекарств.', 'Соберите аптечку и запас необходимых препаратов, назначенных врачом, с учётом сроков годности, условий хранения и правил отпуска.');
+    updateAuditCard('14', 'Есть дублирующий заранее проверенный канал связи.', 'Добавьте дублирующий канал связи: например, второго оператора или другой заранее проверенный способ связи.');
     updateAuditCard('16', 'Есть защищённая офлайн-копия ключей доступа и паролей.', 'Храните защищённую офлайн-копию ключей и паролей: в офлайн-менеджере с шифрованием или на бумаге в физически защищённом месте.');
 
     var replacements = [
@@ -281,6 +338,7 @@
       ['Подготовьте ИБП для критичных устройств (роутер, холодильник).', 'Подберите резервное питание критичных устройств по мощности и пусковым токам.'],
       ['Держите дома наличные мелкими и средними купюрами — при сбое терминалов это единственный способ оплаты.', 'Держите разумный резерв наличных на случай временной недоступности эквайринга или банкоматов.'],
       ['Соберите домашнюю аптечку и запас необходимых лекарств.', 'Соберите аптечку и запас назначенных врачом лекарств с учётом правил отпуска и хранения.'],
+      ['Подключите дублирующий канал связи (второй оператор, рация).', 'Подключите дублирующий заранее проверенный канал связи, например второго оператора.'],
       ['Сохраните ключи доступа и пароли в офлайн-виде.', 'Сделайте защищённую офлайн-копию ключей доступа и паролей.']
     ];
 
@@ -304,4 +362,5 @@
   patchResources();
   patchAbout();
   patchAudit();
+  interceptAuditCopyButtons();
 })();
