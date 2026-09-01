@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Конфиденциальность проекта «ЕСЛИ ОТКЛЮЧАТ»: какие данные остаются в браузере и что происходит при обращении по электронной почте.">
+  <title>Конфиденциальность — ЕСЛИ ОТКЛЮЧАТ</title>
+  <link rel="stylesheet" href="styles.css">
+  <meta name="theme-color" content="#123c4a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">ЕСЛИ&nbsp;ОТКЛЮЧАТ</a>
+      <nav class="main-nav">
+        <a href="index.html#what">Что отключится</a>
+        <a href="index.html#prepare">Что подготовить</a>
+        <a href="index.html#family">Семье</a>
+        <a href="index.html#business">Бизнесу</a>
+        <a href="index.html#today">Сегодня</a>
+        <a href="about.html">О проекте</a>
+        <a href="checklist.html">Чек-лист</a>
+        <a href="resources.html">Ресурсы</a>
+        <a href="audit.html">Аудит</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero hero-sub">
+      <div class="container hero-inner">
+        <p class="hero-eyebrow">Конфиденциальность</p>
+        <h1 class="hero-title">Как сайт работает с данными</h1>
+        <p class="hero-lead">Мы стараемся собирать как можно меньше данных. Аудит и чек-лист работают локально в вашем браузере.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <header class="section-head"><span class="section-tag">01</span><h2>Аудит и чек-лист</h2></header>
+        <p>Ответы аудита и отметки чек-листа сохраняются в <strong>localStorage</strong> вашего браузера. Проект не отправляет эти данные автору и не хранит их в собственной базе данных.</p>
+        <p>Вы можете удалить их средствами браузера или кнопками сброса на соответствующих страницах. Экспорт «Мой План Б» создаётся на вашем устройстве и скачивается как JSON-файл.</p>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <header class="section-head"><span class="section-tag">02</span><h2>Обратная связь</h2></header>
+        <p>На сайте нет формы обратной связи. Ссылка «Написать автору» открывает вашу почтовую программу. Письмо отправляется только после вашего собственного действия.</p>
+        <p>Если вы пишете автору, адрес электронной почты и сведения, которые вы сами включили в письмо, используются для ведения переписки и ответа на обращение. Не указывайте лишние персональные или чувствительные сведения, если они не нужны для вопроса.</p>
+        <p>Контакт для вопросов о конфиденциальности: <a href="mailto:iot37@yandex.ru">iot37@yandex.ru</a>.</p>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <header class="section-head"><span class="section-tag">03</span><h2>Хостинг и внешние сервисы</h2></header>
+        <p>Сайт размещён на GitHub Pages. Проект не подключает собственную веб-аналитику, рекламные пиксели или внешние библиотеки. При обращении к сайту инфраструктура хостинг-провайдера может обрабатывать стандартные технические данные соединения в соответствии со своими правилами.</p>
+        <p>Офлайн-версия сохраняет основные файлы сайта в кэше браузера через service worker, чтобы страницы могли открываться при отсутствии сети.</p>
+      </div>
+    </section>
+
+    <section class="section section-alt">
+      <div class="container">
+        <header class="section-head"><span class="section-tag">04</span><h2>Важно</h2></header>
+        <p>Если в будущем на сайте появятся формы, подписка, аналитика или иные способы сбора данных, это уведомление будет пересмотрено до включения таких функций.</p>
+        <p>Версия уведомления: 1 сентября 2026 года.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container"><p>ЕСЛИ ОТКЛЮЧАТ — План Б для людей и бизнеса. Все материалы носят информационный характер.</p></div></footer>
+  <script src="app.js" defer></script>
+  <script src="plan-tools.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://sergkliukhin.github.io/esli-otklyuchat-site/sitemap.xml
