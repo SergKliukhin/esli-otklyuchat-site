@@ -155,6 +155,16 @@
   function patchIndex() {
     if (pageName() !== 'index.html') return;
 
+    var aboutParagraphs = document.querySelectorAll('.about .about-inner > p');
+    if (aboutParagraphs.length >= 3) {
+      aboutParagraphs[0].textContent = '«ЕСЛИ ОТКЛЮЧАТ» – проект о цифровой устойчивости людей и бизнеса.';
+      aboutParagraphs[1].textContent = 'Мы не прогнозируем катастрофы и не занимаемся конспирологией.';
+      aboutParagraphs[2].textContent = 'Наша задача – помочь сохранить связь, данные, работу и спокойствие в условиях ограничений, сбоев и технических проблем.';
+    }
+
+    var footerText = document.querySelector('.site-footer .container > p');
+    if (footerText) footerText.textContent = 'ЕСЛИ ОТКЛЮЧАТ – План Б для людей и бизнеса. Все материалы носят информационный характер.';
+
     setCardText('#what', 'Интернет и связь', 'При сбое сети могут стать временно недоступны мессенджеры, банковские приложения, онлайн-карты, навигация и облачные сервисы. Мобильная связь тоже может работать нестабильно.');
     setCardText('#what', 'Платёжные системы', 'Терминалы и банкоматы зависят от связи и электричества. Поэтому полезно заранее иметь резервный способ оплаты.');
     setCardText('#prepare', 'Вода и еда', 'Для аварийного питьевого запаса ориентируйтесь примерно на 3 л воды на человека в сутки; для приготовления пищи и гигиены потребуется дополнительная вода. Храните нескоропортящиеся продукты и регулярно обновляйте запас.');
@@ -237,6 +247,14 @@
   function patchAbout() {
     if (pageName() !== 'about.html') return;
 
+    var description = 'О проекте «ЕСЛИ ОТКЛЮЧАТ»: цели, принципы и подход к цифровой устойчивости людей и бизнеса.';
+    var descriptionNode = document.querySelector('meta[name="description"]');
+    if (descriptionNode) descriptionNode.setAttribute('content', description);
+    setMeta('og:description', description);
+
+    var heroLead = document.querySelector('.hero .hero-lead');
+    if (heroLead) heroLead.textContent = 'Проект о цифровой устойчивости людей и бизнеса. Помогаем сохранить связь, данные, работу и спокойствие в условиях ограничений, сбоев и технических проблем.';
+
     Array.prototype.slice.call(document.querySelectorAll('.steps li')).forEach(function (item) {
       var h3 = item.querySelector('h3');
       var p = item.querySelector('p');
@@ -252,8 +270,28 @@
       }
     });
 
-    var role = document.querySelector('.profile-role');
-    if (role) role.textContent = 'Медиолог. Социальный психолог. Автор проекта «ЕСЛИ ОТКЛЮЧАТ»';
+    var authorHeading = Array.prototype.slice.call(document.querySelectorAll('.section-head h2')).find(function (node) {
+      return node.textContent.trim() === 'Об авторе';
+    });
+    if (authorHeading) {
+      var section = authorHeading.closest('section');
+      var tag = section && section.querySelector('.section-tag');
+      var profile = section && section.querySelector('.profile');
+      authorHeading.textContent = 'Команда проекта';
+      if (tag) tag.textContent = '05';
+      if (profile) {
+        profile.innerHTML = '<div class="profile-avatar" aria-hidden="true">ПБ</div>' +
+          '<div class="profile-body">' +
+          '<h3>Команда проекта «ЕСЛИ ОТКЛЮЧАТ»</h3>' +
+          '<p class="profile-role">Технологии, практическая устойчивость и товарное направление</p>' +
+          '<p>Проект развивается командой. Методика, содержание, техническое развитие и коммерческое направление формируются совместно – с разделением ответственности по компетенциям.</p>' +
+          '<p>Главный принцип остаётся общим: не нагнетать риски и не продавать лишние вещи, а помогать человеку или бизнесу закрыть конкретную слабую зону своего «Плана Б».</p>' +
+          '</div>';
+      }
+    }
+
+    var footerText = document.querySelector('.site-footer .container > p');
+    if (footerText) footerText.textContent = 'ЕСЛИ ОТКЛЮЧАТ – План Б для людей и бизнеса. Все материалы носят информационный характер.';
   }
 
   function updateAuditCard(id, title, recommendation) {
